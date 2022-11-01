@@ -1,0 +1,59 @@
+# -*- coding: utf-8 -*-
+
+import numpy as np
+import requests
+from bs4 import BeautifulSoup
+import pandas as pd
+from selenium import webdriver
+import datetime
+
+# variables
+obs=[]
+case_num=[]
+date=[]
+district=[]
+reason=[]
+front_url = "https://gnews.gg.go.kr/briefing/brief_covid19.do?page="
+back_url = "&search=0&keyword=&search_type=&CU_CODE1=NA06&CU_CODE2=NB39" 
+
+# Number of Last page
+start_page=1745
+last_page=1747
+#last_page=2010
+
+# crawling code
+
+    for i in range(start_page, last_page+1):
+        url=front_url+str(i)+back_url
+
+        driver = webdriver.Chrome('./chromedriver')
+        driver.implicitly_wait(1)
+        driver.get(url)
+        driver.implicitly_wait(1)
+        
+        table = driver.find_element_by_class_name('table')
+        tbody = table.find_element_by_tag_name("tbody")
+        rows = tbody.find_elements_by_tag_name("tr")
+        
+        for index, value in enumerate(rows):
+            body=value.find_elements_by_tag_name("td")[0]
+            obs.append((body.text))
+            body=value.find_elements_by_tag_name("td")[1]
+            case_num.append((body.text))
+            body=value.find_elements_by_tag_name("td")[2]
+            date.append((body.text))
+            body=value.find_elements_by_tag_name("td")[3]
+            district.append((body.text))
+            body=value.find_elements_by_tag_name("td")[4]
+            reason.append((body.text))
+
+# DataFrame
+
+df1=pd.DataFrame({'obs':obs,'case_number':case_num,'date':date,'district':district,'reason':reason})
+print(df1)
+
+# Writing csv
+
+df1.to_csv('test1.csv', encoding='utf-8-sig')
+
+
